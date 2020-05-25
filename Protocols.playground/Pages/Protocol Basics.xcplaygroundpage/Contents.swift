@@ -69,7 +69,26 @@ rand.random()
 
 //: Using built-in Protocols
 
+if "John" == "john" {
+    print("They are the same")
+}
 
+extension Starship: Equatable {
+    static func == (lhs: Starship, rhs: Starship) -> Bool {
+        if lhs.fullName == rhs.fullName { return true }
+        else { return false }
+    }
+}
+
+if ncc1701 == fireFly {
+    print("Same Starship")
+}
+
+struct Person2 {
+    static let species = "Boo"
+}
+
+print(Person2.species)
 
 //: ## Protocols as Types
 
