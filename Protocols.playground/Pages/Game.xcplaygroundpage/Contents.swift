@@ -32,15 +32,86 @@ class Dice {
 }
 
 //: Now, let's define a couple protocols for managing a dice-based game.
+protocol DiceGame {
+    var dice: Dice { get }
+    func play()
+}
 
-
+protocol DiceGameDelegate {
+    func gameDidStart(_ game: DiceGame)
+    func game(_ game: DiceGame, didStartNewTurnWithDiceRoll diceRoll: Int)
+    func gameDidEnd(_ game: DiceGame)
+}
 
 //: Lastly, we'll create a custom class for tracking a player in our dice game.
 
+class Player {
+    let id: Int
+    let knockOutNumber: Int = Int.random(in: 6...9)
+    var score: Int = 0
+    var knockedOut: Bool = false
+    
+    init(id: Int) {
+        self.id = id
+    }
+}
 
 
 //: With all that configured, let's build our dice game class called _Knock Out!_
 
+class KnockOut: DiceGame {
+    let dice = Dice(sides: 6, generator: OneThroughTen())
+    var players: [Player] = []
+    
+    init(numberOfPlayers: Int) {
+        for i in 1...numberOfPlayers {
+            let aPlayer = Player(id: i)
+            players.append(aPlayer)
+        }
+    }
+    
+    var delegate: DiceGameDelegate?
+    
+    func play() {
+        delegate?.gameDidStart(self)
+        
+        var reachedGameEnd = false
+        while !reachedGameEnd {
+            for player in players where player.knockedOut == false {
+                // rolling the dice
+                let diceRollSum = dice.roll() + dice.roll()
+                
+                delegate?.game(self, didStartNewTurnWithDiceRoll: diceRollSum)
+                
+                // check knockout number
+                if diceRollSum == player.knockOutNumber {
+                    print("Player \(player.id) is knocked out by rolling: \(player.knockOutNumber)")
+                
+                // if it is the knockout number, goodbye player
+                
+                player.knockedOut = true
+                    let activePlayers = players.filter( {$0.knockedOut == false })
+                    if activePlayers.count == 0 {
+                        reachedGameEnd = true
+                        print("All players are knocked out.")
+                    }
+                } else {
+                // if it is not, add score to running score
+                    player.score += diceRollSum
+                    // Game Ends
+                    // all players are knocked out
+                    // or when a player reaches 100
+                    if player.score >= 100 {
+                        reachedGameEnd = true
+                        print("Player \(player.id) has won with a final score of \(player.score)")
+                    }
+                }
+                delegate?.gameDidEnd(self)
+                // Game Ends
+            }
+        }
+    }
+}
 
 
 //: The following class is used to track the status of the above game, and will conform to the `DiceGameDelegate` protocol.

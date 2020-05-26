@@ -91,5 +91,29 @@ struct Person2 {
 print(Person2.species)
 
 //: ## Protocols as Types
+class Dice {
+    let sides: Int
+    let generator: GeneratesRandomNumbers // the generator can be of any type that conforms to the protocol GeneratesRandomNumbers
+    
+    init (sides: Int, generator: GeneratesRandomNumbers) {
+        self.sides = sides
+        self.generator = generator
+    }
+    
+    func roll() -> Int {
+        return Int(generator.random() % sides) + 1
+        // Dice has 6 sides
+        // 1 % 6 = 5 + 1 = 6
+        // 2 % 6 = 4 + 1 = 5
+        // ...
+        // 10 % 6  = 4 + 1 = 5
+    }
+}
+
+var d6 = Dice(sides: 6, generator: OneThroughTen())
+for _ in 1...5 {
+    print("Random dice roll is \(d6.roll())")
+}
+
 
 
